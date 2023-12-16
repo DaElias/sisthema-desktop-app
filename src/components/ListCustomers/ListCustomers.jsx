@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
-import { getCustomers } from "../../util/dataStorage"
+import { createCustomer, deleteCustomerById, getCustomers } from "../../util/dataStorage"
 import CustomersFormModal from "../CustomersForm"
 import { open } from "@tauri-apps/api/shell"
 import Tooltip from "../UI/Tooltip"
+import ModalAlertDelete from "../ModalComponent/ModalAlertDelete"
 
 
 
@@ -10,7 +11,19 @@ export default function ListCustomers() {
     const [constumers, setConstumers] = useState([])
     const [currentConstumers, setCurrentConstumers] = useState({ id: "", name: "", last_name: "", contact_1: "", email_1: "", address: "" })
     const [inputSearchText, setInputSearchText] = useState("")
-    const [showModal, setShowModal] = useState(false)
+
+    const [showModalCustomers, setShowModalCustomers] = useState(false)
+    const [showModalAletDelete, setShowModalAletDelete] = useState(false)
+    const [indexCustomersSelectedDelete, setValidateAlertDelete] = useState(-1)
+
+
+    const handleDeleteElementById = async () => {
+        setShowModalAletDelete(false)
+        await deleteCustomerById(indexCustomersSelectedDelete)
+        await getDataCustomers()
+    }
+
+
 
     const handleChange = (event) => {
         const { value } = event.target
@@ -20,6 +33,18 @@ export default function ListCustomers() {
     const getDataCustomers = async () => {
         const data = await getCustomers()
         setConstumers(data)
+    }
+
+    const HandleAction = async (customer) => {
+        console.log(customer)
+        setShowModalCustomers(false)
+        if (customer.id == "") {
+            // console.log("create customers")
+            await createCustomer(customer)
+            await getDataCustomers()
+        } else {
+            // console.log("update element")
+        }
     }
 
     const filterSearchCustomers = async () => {
@@ -43,7 +68,7 @@ export default function ListCustomers() {
             last_name: newCustomers.last_name,
             name: newCustomers.name
         })
-        setShowModal(true)
+        setShowModalCustomers(true)
     }
     const renderTable = useCallback((constumer) => {
         return (
@@ -70,8 +95,10 @@ export default function ListCustomers() {
                 <td className="px-6 py-4 text-right">
                     <button
                         onClick={() => handleEditCustomers(constumer)}
-                        href="#" className="mr-2 font-medium text-blue-600 dark:text-blue-500 hover:underline">📝 Modificare</button>
-                    <button href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">🗑️ Eliminare</button>
+                        className="mr-2 font-medium text-blue-600 dark:text-blue-500 hover:underline">📝 Modificare</button>
+                    <button
+                        onClick={() => { setValidateAlertDelete(constumer.id); setShowModalAletDelete(true) }}
+                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline">🗑️ Eliminare</button>
                 </td>
             </tr>
         )
@@ -96,7 +123,10 @@ export default function ListCustomers() {
                         )
                     }
                 </div>
-                <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <button
+                    onClick={() => { setShowModalCustomers(true); setCurrentConstumers({ id: "", name: "", last_name: "", contact_1: "", email_1: "", address: "" }) }}
+                    type="button"
+                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                     <span>
                         ✚ Creare Cliente
                     </span>
@@ -134,7 +164,8 @@ export default function ListCustomers() {
                     }
                 </table>
             </div>
-            <CustomersFormModal {...currentConstumers} show={showModal} onClose={() => { setShowModal(false) }} />
+            <CustomersFormModal {...currentConstumers} show={showModalCustomers} onClose={() => { setShowModalCustomers(false) }} handleAction={HandleAction} />
+            <ModalAlertDelete handleAction={() => handleDeleteElementById()} show={showModalAletDelete} onClose={() => { setShowModalAletDelete(false); setValidateAlertDelete(-1) }} />
         </div>
     )
 }

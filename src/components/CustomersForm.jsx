@@ -4,23 +4,21 @@ import Row from "./UI/Row";
 import { open } from '@tauri-apps/api/shell';
 import InputText from "./UI/InputText";
 
+const initialStateCustomer = {
+    id: "", name: "", last_name: "", contact_1: "", email_1: "", address: ""
+}
+
 export default function CustomersFormModal(
-    { show, onClose,
+    { show, onClose, handleAction = () => { },
         id = "", name = "", last_name = "", contact_1 = "", email_1 = "", address = "" }
 ) {
-    const [customers, setCustomers] = useState({id: "",name: "",last_name: "",contact_1: "",email_1: "",address: ""
-    })
-    
+    const [customers, setCustomers] = useState(initialStateCustomer)
+
     useEffect(() => {
         setCustomers({
-            id,
-            name,
-            last_name,
-            contact_1,
-            email_1,
-            address
+            id, name, last_name, contact_1, email_1, address
         })
-    }, [])
+    }, [id, name, last_name, contact_1, email_1, address])
 
     const handleChangeCustomers = (event) => {
         const { value, name } = event.target
@@ -100,7 +98,9 @@ export default function CustomersFormModal(
                     </tbody>
                 </table>
             </div>
-            <button type="button" className="w-full my-2 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Salvar</button>
+            <button
+                onClick={() => { handleAction(customers); }}
+                type="button" className="w-full my-2 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Salvar</button>
         </ModalComponent>
     )
 }

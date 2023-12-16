@@ -3,8 +3,19 @@ export default function ModalComponent({ children, show = false, onClose, titleM
     if (!show) {
         return null
     }
+
+    const handleKeyDown = (event) => {
+        const { keyCode } = event
+        if (keyCode == 27) {
+            onClose()
+        }
+    }
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ">
+        <div
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ">
             <div className="bg-slate-100 p-6 rounded-lg">
                 <button className="float-right text-gray-700 hover:text-black" onClick={onClose}>
                     <svg
@@ -16,7 +27,6 @@ export default function ModalComponent({ children, show = false, onClose, titleM
                     </svg>
                 </button>
                 <h2 className="text-2xl font-bold mb-4">{titleModal}</h2>
-                {/* <p>This is a basic modal example in React with Tailwind CSS!</p> */}
                 {children}
             </div>
         </div>
