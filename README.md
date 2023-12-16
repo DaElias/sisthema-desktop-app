@@ -1,4 +1,5 @@
-# Tauri + React
+# Sisthema App
+## Tauri + React
 
 ![Sisthema](https://res.cloudinary.com/dy5wl8c6k/image/upload/v1702754464/proyect/ca3mg8cnaxvq9lpuxwkr.png)
 
