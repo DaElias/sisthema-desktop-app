@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react"
-import { createCustomer, deleteCustomerById, getCustomers } from "../../util/dataStorage"
+import { createCustomer, deleteCustomerById, editCustomerById, getCustomers } from "../../util/dataStorage"
 import CustomersFormModal from "../CustomersForm"
 import { open } from "@tauri-apps/api/shell"
 import Tooltip from "../UI/Tooltip"
 import ModalAlertDelete from "../ModalComponent/ModalAlertDelete"
+import ModalCategory from "../ModalComponent/ModalCategory/ModalCategory"
 
 
 
@@ -16,14 +17,13 @@ export default function ListCustomers() {
     const [showModalAletDelete, setShowModalAletDelete] = useState(false)
     const [indexCustomersSelectedDelete, setValidateAlertDelete] = useState(-1)
 
+    const [showModalCategories, setShowModalCategories] = useState(false)
 
     const handleDeleteElementById = async () => {
         setShowModalAletDelete(false)
         await deleteCustomerById(indexCustomersSelectedDelete)
         await getDataCustomers()
     }
-
-
 
     const handleChange = (event) => {
         const { value } = event.target
@@ -44,6 +44,8 @@ export default function ListCustomers() {
             await getDataCustomers()
         } else {
             // console.log("update element")
+            await editCustomerById(customer)
+            await getDataCustomers()
         }
     }
 
@@ -103,6 +105,7 @@ export default function ListCustomers() {
             </tr>
         )
     }, [constumers])
+
     return (
         <div className="flex flex-col m-2 gap-2">
             <div className="flex justify-between">
@@ -123,14 +126,24 @@ export default function ListCustomers() {
                         )
                     }
                 </div>
-                <button
-                    onClick={() => { setShowModalCustomers(true); setCurrentConstumers({ id: "", name: "", last_name: "", contact_1: "", email_1: "", address: "" }) }}
-                    type="button"
-                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    <span>
-                        ✚ Creare Cliente
-                    </span>
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => { setShowModalCategories(true) }}
+                        type="button"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <span>
+                            ✨ Creare Categoria
+                        </span>
+                    </button>
+                    <button
+                        onClick={() => { setShowModalCustomers(true); setCurrentConstumers({ id: "", name: "", last_name: "", contact_1: "", email_1: "", address: "" }) }}
+                        type="button"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <span>
+                            ✚ Creare Cliente
+                        </span>
+                    </button>
+                </div>
             </div>
             <div className="relative overflow-x-auto rounded-xl">
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -166,6 +179,7 @@ export default function ListCustomers() {
             </div>
             <CustomersFormModal {...currentConstumers} show={showModalCustomers} onClose={() => { setShowModalCustomers(false) }} handleAction={HandleAction} />
             <ModalAlertDelete handleAction={() => handleDeleteElementById()} show={showModalAletDelete} onClose={() => { setShowModalAletDelete(false); setValidateAlertDelete(-1) }} />
+            <ModalCategory show={showModalCategories} onClose={() => setShowModalCategories(false)} />
         </div>
     )
 }

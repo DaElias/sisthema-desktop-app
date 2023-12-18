@@ -1,12 +1,12 @@
 
-export default function ModalComponent({ children, show = false, onClose, titleModal = "Modal Title" }) {
+export default function ModalComponent({ isBlockEsc = false, children, show = false, onClose, titleModal = "Modal Title" }) {
     if (!show) {
         return null
     }
 
     const handleKeyDown = (event) => {
         const { keyCode } = event
-        if (keyCode == 27) {
+        if (keyCode == 27 && !isBlockEsc) {
             onClose()
         }
     }
