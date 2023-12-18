@@ -22,7 +22,12 @@ export default function ListCustomers() {
     const handleDeleteElementById = async () => {
         setShowModalAletDelete(false)
         await deleteCustomerById(indexCustomersSelectedDelete)
-        await getDataCustomers()
+        if (inputSearchText != "") {
+            filterSearchCustomers()
+        } else {
+            await getDataCustomers()
+        }
+
     }
 
     const handleChange = (event) => {
@@ -117,12 +122,17 @@ export default function ListCustomers() {
                         placeholder="Cerca per nome del cliente..."
                         className="w-full p-2 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 dark:text-white"
                     />
-                    {inputSearchText.length !== 0 &&
+                    {inputSearchText.length !== 0 ?
                         (
                             <span
                                 onClick={() => setInputSearchText("")}
                                 className="cursor-pointer dark:text-white absolute right-4 top-2 font-extrabold text-xl"
                             >🅧</span>
+                        ) :
+                        (
+                            <span
+                                className="dark:text-white absolute right-4 top-2 font-extrabold text-xl"
+                            >🔍</span>
                         )
                     }
                 </div>
