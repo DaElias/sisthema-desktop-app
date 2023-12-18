@@ -47,7 +47,7 @@ export default function ItemCategory({ setIsCreateCategory = false, isNew = fals
                 {!isEdit ?
                     category.name
                     :
-                    <input className="text-black" type="text" value={category.name} onChange={handleChange} />
+                    <input className="bg-white hover:bg-gray-50 dark:hover:bg-gray-600 text-black border-black border-b-2" type="text" value={category.name} onChange={handleChange} />
                 }
             </td>
             <td className="flex gap-2 px-6 py-4">
