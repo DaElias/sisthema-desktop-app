@@ -1,9 +1,11 @@
 
 import { Store } from "tauri-plugin-store-api";
 import { v4 as uuid } from "uuid"
+import { covertArrayToHas } from "./util";
 const KEY_STORAGE = "local-storage"
 const KEY_STORAGE_CUSTOMERS = "customers"
 const KEY_STORAGE_CATEGORIES = "categories"
+const KEY_STORAGE_ELEMENTS = "elements"
 
 export async function getDataStorage(key = null) {
     if (!key)
@@ -88,6 +90,10 @@ export async function editCustomerById(customerEdit = {}) {
 export async function getAllCategories() {
     return await getDataStorage(KEY_STORAGE_CATEGORIES) || []
 }
+export async function getAllCategoriesHash() {
+    const list = await getDataStorage(KEY_STORAGE_CATEGORIES) || []
+    return covertArrayToHas({ key: "id", array: list })
+}
 
 export async function createCategory(category = { name: "" }) {
     try {
@@ -134,6 +140,94 @@ export async function editCategoryById(newCategory) {
             return category
         }))
         await store.save()
+    } catch (error) {
+        console.log(error.toString())
+    }
+}
+
+export async function getAllElement() {
+    return await getDataStorage(KEY_STORAGE_ELEMENTS) || {}
+}
+
+export async function getAllElementById(id = -1) {
+    try {
+        if (id == -1)
+            throw Error("id not found!!")
+        const hashCategory = await getAllCategoriesHash()
+        const object = await getAllElement()
+        const list = object[id] || []
+        return list.map(element => {
+            const nameCategory = hashCategory[element.id_category]
+            return { ...element, category: nameCategory?.name }
+        })
+    } catch (error) {
+        console.log(error.toString())
+    }
+}
+
+export async function createElementByIdCustomer(
+    element = { idCustomer: "", name: "", description: "", description_shiping: "", value: 0, id_category: "", state: "" }
+) {
+    try {
+        if (element.idCustomer == "")
+            throw Error("id customer is not found!!")
+
+        const hashElement = await getAllElement()
+        // if (!hashElement[element.idCustomer]) {
+        // hashElement[element.idCustomer] = [element]
+        // } else {
+        const list = hashElement[element.idCustomer] || []
+        list.push({ ...element, id: uuid() })
+        hashElement[element.idCustomer] = list
+        // }
+        const store = new Store(KEY_STORAGE)
+        await store.set(KEY_STORAGE_ELEMENTS, hashElement)
+        await store.save()
+    } catch (error) {
+        console.log(error.toString())
+    }
+}
+
+export async function updateElement(
+    element = { id: "", idCustomer: "", name: "", description: "", description_shiping: "", value: 0, id_category: "", state: "" }
+) {
+    try {
+        if (element.id == "")
+            throw Error("id element is not found!!")
+
+        const hashElement = await getAllElement()
+        const list = hashElement[element.idCustomer] || []
+        hashElement[element.idCustomer] = list.map(item => {
+            if (item.id == element.id) {
+                return element
+            }
+            return item
+        })
+        const store = new Store(KEY_STORAGE)
+        await store.set(KEY_STORAGE_ELEMENTS, hashElement)
+        await store.save()
+
+    } catch (error) {
+        console.log(error.toString())
+    }
+}
+
+export async function deleteElementByIdCustomer(payload = { id: "", idCustomer: "" }) {
+    try {
+        if (payload.idCustomer == "")
+            throw Error("idCustomer is not found!!")
+        if (payload.id == "")
+            throw Error("id element is not found!!")
+
+        const hashElement = await getAllElement()
+        const list = hashElement[payload.idCustomer] || []
+        hashElement[element.idCustomer] = list.filter(element => {
+            if (element.id != payload.id) return element
+        })
+        const store = new Store(KEY_STORAGE)
+        await store.set(KEY_STORAGE_ELEMENTS, hashElement)
+        await store.save()
+        
     } catch (error) {
         console.log(error.toString())
     }

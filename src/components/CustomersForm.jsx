@@ -3,16 +3,28 @@ import ModalComponent from "./ModalComponent/ModalComponent";
 import Row from "./UI/Row";
 import { open } from '@tauri-apps/api/shell';
 import InputText from "./UI/InputText";
-
-const initialStateCustomer = {
-    id: "", name: "", last_name: "", contact_1: "", email_1: "", address: ""
-}
+import ElementsForm from "./ElementsForm";
+import { createElementByIdCustomer, getAllElementById } from "../util/dataStorage";
+import { OPTIONS_STATE_ELEMENT } from "../util/const";
 
 export default function CustomersFormModal(
     { show, onClose, handleAction = () => { },
         id = "", name = "", last_name = "", contact_1 = "", email_1 = "", address = "" }
 ) {
-    const [customers, setCustomers] = useState(initialStateCustomer)
+    const [customers, setCustomers] = useState({ id, name, last_name, contact_1, email_1, address })
+    const [listElements, setListElements] = useState([])
+    const [showModalElements, setShowModalElements] = useState(false)
+
+    const getDataElements = async () => {
+        const data = await getAllElementById(id)
+        setListElements(data)
+    }
+
+    useEffect(() => {
+        if (show) {
+            getDataElements()
+        }
+    }, [show])
 
     useEffect(() => {
         setCustomers({
@@ -27,8 +39,18 @@ export default function CustomersFormModal(
         })
     }
 
+    const handleCreate = async (element) => {
+        console.log(element)
+        if (element.id == "") {
+            await createElementByIdCustomer(element)
+            onClose()
+        } else {
+
+        }
+    }
+
     return (
-        <ModalComponent show={show} titleModal="👤 Informazioni" onClose={onClose} >
+        <ModalComponent show={show} titleModal="👤 Informazioni" onClose={onClose} isBlockEsc={showModalElements}>
             <Row>
                 <label htmlFor="name" className="w-1/2 block mb-2 text-sm font-medium text-black">Nome
                     <InputText onChange={handleChangeCustomers} value={customers.name} id="name" />
@@ -58,11 +80,13 @@ export default function CustomersFormModal(
             <div className="p-1 flex items-center justify-between text-white bg-blue-700 dark:text-white rounded-t-md">
                 <h3 className="font-semibold">Elementi</h3>
                 <Row>
-                    <button className="p-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >Aggiungi elemento</button>
-                    <button className="p-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >Aggiungi categoria</button>
+                    <button
+                        onClick={() => setShowModalElements(true)}
+                        className="p-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >Aggiungi elemento</button>
+                    {/* <button className="p-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >Aggiungi categoria</button> */}
                 </Row>
             </div>
-            <div className="relative overflow-x-auto shadow-md sm:rounded-b-lg max-h-60">
+            <div className="relative overflow-x-auto shadow-md sm:rounded-b-lg max-h-60 bg-blue-600">
                 <table className="w-full text-sm text-left rtl:text-right text-blue-100 dark:text-blue-100">
                     <thead className="text-xs text-white uppercase bg-blue-600 dark:text-white">
                         <tr>
@@ -81,26 +105,39 @@ export default function CustomersFormModal(
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="bg-blue-500 border-b border-blue-400">
-                            <th scope="row" className="px-6 py-4 font-medium text-blue-50 whitespace-nowrap dark:text-blue-100">
-                                Apple MacBook Pro 17"
-                            </th>
-                            <td className="px-6 py-4">
-                                Laptop
-                            </td>
-                            <td className="px-6 py-4">
-                                Non
-                            </td>
-                            <td className="px-6 py-4">
-                                <a href="#" className="font-medium text-white hover:underline">Edit</a>
-                            </td>
-                        </tr>
+                        {
+                            listElements.map(element => {
+                                return (
+                                    <tr key={element.id} className="bg-blue-500 border-b border-blue-400">
+                                        <th scope="row" className="px-6 py-4 font-medium text-blue-50 whitespace-nowrap dark:text-blue-100">
+                                            {element.name}
+                                        </th>
+                                        <td className="px-6 py-4">
+                                            {element.category}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {OPTIONS_STATE_ELEMENT[element.state]}
+                                        </td>
+                                        <td className="flex gap-2 px-6 py-4">
+                                            <button className="font-medium text-white hover:underline">Modificare</button>
+                                            <button className="font-medium text-white hover:underline">Eliminare</button>
+                                        </td>
+                                    </tr>
+                                )
+                            })
+                        }
                     </tbody>
                 </table>
             </div>
             <button
                 onClick={() => { handleAction(customers); }}
                 type="button" className="w-full my-2 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Salvar</button>
+            <ElementsForm
+                show={showModalElements}
+                onClose={() => setShowModalElements(false)}
+                idCustomer={customers.id}
+                handleCreate={handleCreate}
+            />
         </ModalComponent>
     )
 }
