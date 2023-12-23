@@ -28,6 +28,17 @@ export default function ElementsForm({ show, onClose, isNew = false, handleCreat
 
     const handleChange = (event) => {
         const { value, name } = event.target
+
+        if (name == "value_element") {
+            if (value < 0)
+                return
+            if (value == "")
+                setElement(prev => {
+                    return { ...prev, [name]: 0 }
+                })
+            if (!parseInt(value))
+                return
+        }
         setElement(prev => {
             return { ...prev, [name]: value }
         })
@@ -45,6 +56,10 @@ export default function ElementsForm({ show, onClose, isNew = false, handleCreat
             id
         })
         onClose()
+    }
+
+    const handlePrintApi = (element) => {
+        // ${URL}/?elementName="PC"&customersName="juan"&id="1"&value="12"&delivery_description="loremas"&createdAt="12/12/2012"
     }
 
     useEffect(() => {

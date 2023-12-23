@@ -6,6 +6,7 @@ const KEY_STORAGE = "local-storage"
 const KEY_STORAGE_CUSTOMERS = "customers"
 const KEY_STORAGE_CATEGORIES = "categories"
 const KEY_STORAGE_ELEMENTS = "elements"
+const KEY_STORAGE_SETTINGS = "settings"
 
 export async function getDataStorage(key = null) {
     if (!key)
@@ -172,17 +173,19 @@ export async function createElementByIdCustomer(
         if (element.idCustomer == "")
             throw Error("id customer is not found!!")
 
+        const newElement = { ...element, id: uuid() }
         const hashElement = await getAllElement()
         // if (!hashElement[element.idCustomer]) {
         // hashElement[element.idCustomer] = [element]
         // } else {
         const list = hashElement[element.idCustomer] || []
-        list.push({ ...element, id: uuid() })
+        list.push(newElement)
         hashElement[element.idCustomer] = list
         // }
         const store = new Store(KEY_STORAGE)
         await store.set(KEY_STORAGE_ELEMENTS, hashElement)
         await store.save()
+        return newElement
     } catch (error) {
         console.log(error.toString())
     }
@@ -221,14 +224,52 @@ export async function deleteElementByIdCustomer(payload = { id: "", idCustomer: 
 
         const hashElement = await getAllElement()
         const list = hashElement[payload.idCustomer] || []
-        hashElement[element.idCustomer] = list.filter(element => {
+        hashElement[payload.idCustomer] = list.filter(element => {
             if (element.id != payload.id) return element
         })
         const store = new Store(KEY_STORAGE)
         await store.set(KEY_STORAGE_ELEMENTS, hashElement)
         await store.save()
-        
+
     } catch (error) {
         console.log(error.toString())
     }
+}
+
+
+export async function getAllSettings() {
+    return await getDataStorage(KEY_STORAGE_SETTINGS) || {}
+}
+
+export async function setSettingByKey({ key, value }) {
+    try {
+        if (!key)
+            throw Error("key is not found!!")
+        if (!value)
+            throw Error("value is not found!!")
+
+        const settings = await getAllSettings()
+        settings[key] = value
+        const store = new Store(KEY_STORAGE)
+        await store.set(KEY_STORAGE_SETTINGS, settings)
+        await store.save()
+    } catch (error) {
+        console.log(error.toString())
+    }
+}
+
+export async function setSettings(objectSettings = {}) {
+    try {
+        const store = new Store(KEY_STORAGE)
+        await store.set(KEY_STORAGE_SETTINGS, objectSettings)
+        await store.save()
+    } catch (error) {
+        console.log(error.toString())
+    }
+}
+
+
+export async function getSettingByKey(key) {
+    const settings = await getAllSettings()
+    return settings[key]
 }

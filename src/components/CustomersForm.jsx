@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import ModalComponent from "./ModalComponent/ModalComponent";
-import Row from "./UI/Row";
+import { createElementByIdCustomer, deleteElementByIdCustomer, getAllElementById } from "../util/dataStorage";
 import { open } from '@tauri-apps/api/shell';
+import Row from "./UI/Row";
 import InputText from "./UI/InputText";
 import ElementsForm from "./ElementsForm";
-import { createElementByIdCustomer, getAllElementById } from "../util/dataStorage";
+import ModalComponent from "./ModalComponent/ModalComponent";
+import PrintIcon from "./UI/svg/PrintIcon"
 import { OPTIONS_STATE_ELEMENT } from "../util/const";
 
 export default function CustomersFormModal(
@@ -19,7 +20,6 @@ export default function CustomersFormModal(
         const data = await getAllElementById(id)
         setListElements(data)
     }
-
     useEffect(() => {
         if (show) {
             getDataElements()
@@ -43,10 +43,18 @@ export default function CustomersFormModal(
         console.log(element)
         if (element.id == "") {
             await createElementByIdCustomer(element)
-            onClose()
         } else {
 
         }
+    }
+
+    const handleDeleteElements = async ({ id, idCustomer }) => {
+        await deleteElementByIdCustomer({ id, idCustomer })
+        await getDataElements()
+    }
+
+    const handlePrint = async (element) => {
+        console.log("print: ",element)
     }
 
     return (
@@ -116,11 +124,20 @@ export default function CustomersFormModal(
                                             {element.category}
                                         </td>
                                         <td className="px-6 py-4">
-                                            {OPTIONS_STATE_ELEMENT[element.state]}
+                                            {OPTIONS_STATE_ELEMENT[element.state] || "?"}
                                         </td>
                                         <td className="flex gap-2 px-6 py-4">
                                             <button className="font-medium text-white hover:underline">Modificare</button>
-                                            <button className="font-medium text-white hover:underline">Eliminare</button>
+                                            <button
+                                                onClick={() => handleDeleteElements({ id: element.id, idCustomer: element.idCustomer })}
+                                                className="font-medium text-white hover:underline">
+                                                Eliminare
+                                            </button>
+                                            <button
+                                                onClick={() => handlePrint(element)}
+                                                className="font-medium text-white hover:underline">
+                                                <PrintIcon isWhite size={20} />
+                                            </button>
                                         </td>
                                     </tr>
                                 )

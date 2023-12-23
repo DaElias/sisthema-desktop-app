@@ -5,6 +5,7 @@ import { open } from "@tauri-apps/api/shell"
 import Tooltip from "../UI/Tooltip"
 import ModalAlertDelete from "../ModalComponent/ModalAlertDelete"
 import ModalCategory from "../ModalComponent/ModalCategory/ModalCategory"
+import ModalSettings from "../ModalComponent/ModalSettings"
 
 
 
@@ -18,6 +19,7 @@ export default function ListCustomers() {
     const [indexCustomersSelectedDelete, setValidateAlertDelete] = useState(-1)
 
     const [showModalCategories, setShowModalCategories] = useState(false)
+    const [showModalSetting, setShowModalSetting] = useState(false)
 
     const handleDeleteElementById = async () => {
         setShowModalAletDelete(false)
@@ -41,7 +43,7 @@ export default function ListCustomers() {
     }
 
     const HandleAction = async (customer) => {
-        console.log(customer)
+        console.log("HandleAction-LisCustomers", customer)
         setShowModalCustomers(false)
         if (customer.id == "") {
             // console.log("create customers")
@@ -114,24 +116,24 @@ export default function ListCustomers() {
     return (
         <div className="flex flex-col m-2 gap-2">
             <div className="flex justify-between">
-                <div className="w-1/2 relative">
+                <div className="w-1/2 relative pr-2">
                     <input
                         onChange={handleChange}
                         value={inputSearchText}
                         type="text"
                         placeholder="Cerca per nome del cliente..."
-                        className="w-full p-2 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 dark:text-white"
+                        className="w-full h-full p-2 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 dark:text-white"
                     />
                     {inputSearchText.length !== 0 ?
                         (
                             <span
                                 onClick={() => setInputSearchText("")}
-                                className="cursor-pointer dark:text-white absolute right-4 top-2 font-extrabold text-xl"
+                                className="cursor-pointer dark:text-white absolute right-4 top-4 font-extrabold text-xl"
                             >🅧</span>
                         ) :
                         (
                             <span
-                                className="dark:text-white absolute right-4 top-2 font-extrabold text-xl"
+                                className="dark:text-white absolute right-4 top-4 font-extrabold text-xl"
                             >🔍</span>
                         )
                     }
@@ -151,6 +153,14 @@ export default function ListCustomers() {
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         <span>
                             ✚ Creare Cliente
+                        </span>
+                    </button>
+                    <button
+                        onClick={() => setShowModalSetting(true)}
+                        type="button"
+                        className="text-white bg-slate-700 hover:bg-slate-800 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-lg text-sm px-1 text-center inline-flex items-center me-2 dark:bg-slate-600 dark:hover:bg-slate-700 dark:focus:ring-slate-800">
+                        <span>
+                            ⚙️ Impostazioni
                         </span>
                     </button>
                 </div>
@@ -187,6 +197,7 @@ export default function ListCustomers() {
                     }
                 </table>
             </div>
+            <ModalSettings show={showModalSetting} onClose={() => setShowModalSetting(false)} />
             <CustomersFormModal {...currentConstumers} show={showModalCustomers} onClose={() => { setShowModalCustomers(false) }} handleAction={HandleAction} />
             <ModalAlertDelete handleAction={() => handleDeleteElementById()} show={showModalAletDelete} onClose={() => { setShowModalAletDelete(false); setValidateAlertDelete(-1) }} />
             <ModalCategory show={showModalCategories} onClose={() => setShowModalCategories(false)} />
