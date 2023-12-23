@@ -2,11 +2,8 @@
 import { Store } from "tauri-plugin-store-api";
 import { v4 as uuid } from "uuid"
 import { covertArrayToHas } from "./util";
-const KEY_STORAGE = "local-storage"
-const KEY_STORAGE_CUSTOMERS = "customers"
-const KEY_STORAGE_CATEGORIES = "categories"
-const KEY_STORAGE_ELEMENTS = "elements"
-const KEY_STORAGE_SETTINGS = "settings"
+import { KEY_STORAGE, KEY_STORAGE_CUSTOMERS, KEY_STORAGE_CATEGORIES, KEY_STORAGE_ELEMENTS, KEY_STORAGE_SETTINGS } from "./const";
+
 
 export async function getDataStorage(key = null) {
     if (!key)
@@ -55,9 +52,11 @@ export async function createCustomer({ name = "", last_name = "", contact_1 = ""
             throw Error("feld name and last_name are required!!")
         const store = new Store(KEY_STORAGE)
         const list = await getCustomers()
-        list.push({ id: uuid(), name, last_name, contact_1, email_1, address })
+        const customer = { id: uuid(), name, last_name, contact_1, email_1, address }
+        list.push(customer)
         await store.set(KEY_STORAGE_CUSTOMERS, list)
         await store.save()
+        return customer
     } catch (error) {
         console.log(error.toString())
     }
@@ -191,7 +190,7 @@ export async function createElementByIdCustomer(
     }
 }
 
-export async function updateElement(
+export async function updateElementById(
     element = { id: "", idCustomer: "", name: "", description: "", description_shiping: "", value: 0, id_category: "", state: "" }
 ) {
     try {

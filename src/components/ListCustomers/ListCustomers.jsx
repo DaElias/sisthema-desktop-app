@@ -6,6 +6,8 @@ import Tooltip from "../UI/Tooltip"
 import ModalAlertDelete from "../ModalComponent/ModalAlertDelete"
 import ModalCategory from "../ModalComponent/ModalCategory/ModalCategory"
 import ModalSettings from "../ModalComponent/ModalSettings"
+import EditIcon from "../UI/svg/EditIcon"
+import DeleteIcon from "../UI/svg/DeleteIcon"
 
 
 
@@ -43,17 +45,15 @@ export default function ListCustomers() {
     }
 
     const HandleAction = async (customer) => {
-        console.log("HandleAction-LisCustomers", customer)
         setShowModalCustomers(false)
         if (customer.id == "") {
             // console.log("create customers")
             await createCustomer(customer)
-            await getDataCustomers()
         } else {
             // console.log("update element")
             await editCustomerById(customer)
-            await getDataCustomers()
         }
+        await getDataCustomers()
     }
 
     const filterSearchCustomers = async () => {
@@ -104,10 +104,18 @@ export default function ListCustomers() {
                 <td className="px-6 py-4 text-right">
                     <button
                         onClick={() => handleEditCustomers(constumer)}
-                        className="mr-2 font-medium text-blue-600 dark:text-blue-500 hover:underline">📝 Modificare</button>
+                        className="mr-2 font-medium text-blue-600 dark:text-white dark:hover:text-blue-600 hover:underline">
+                        <Tooltip text={"Modificare"}>
+                            <EditIcon size="20" />
+                        </Tooltip>
+                    </button>
                     <button
                         onClick={() => { setValidateAlertDelete(constumer.id); setShowModalAletDelete(true) }}
-                        className="font-medium text-blue-600 dark:text-blue-500 hover:underline">🗑️ Eliminare</button>
+                        className="font-medium text-blue-600 dark:text-white dark:hover:text-blue-600 hover:underline">
+                        <Tooltip text={"Eliminare"}>
+                            <DeleteIcon size="20" />
+                        </Tooltip>
+                    </button>
                 </td>
             </tr>
         )
@@ -128,12 +136,12 @@ export default function ListCustomers() {
                         (
                             <span
                                 onClick={() => setInputSearchText("")}
-                                className="cursor-pointer dark:text-white absolute right-4 top-4 font-extrabold text-xl"
+                                className="cursor-pointer dark:text-white absolute right-4 top-4 sm:top-2 font-extrabold text-xl"
                             >🅧</span>
                         ) :
                         (
                             <span
-                                className="dark:text-white absolute right-4 top-4 font-extrabold text-xl"
+                                className="dark:text-white absolute right-4 top-4 sm:top-2 font-extrabold text-xl"
                             >🔍</span>
                         )
                     }
@@ -144,7 +152,7 @@ export default function ListCustomers() {
                         type="button"
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         <span>
-                            ✨ Creare Categoria
+                            Creare Categoria
                         </span>
                     </button>
                     <button
@@ -166,41 +174,59 @@ export default function ListCustomers() {
                 </div>
             </div>
             <div className="relative overflow-x-auto rounded-xl">
-                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                        <tr>
-                            <th scope="col" className="px-6 py-3">
-                                Nome
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Cognome
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Indirizzo
-                            </th>
-                            <th scope="col" className="px-6 py-3">
-                                Telefono
-                            </th>
-                            <th scope="col" className="px-6 py-3"></th>
-                        </tr>
-                    </thead>
-                    {constumers.length == 0 ?
+                {constumers.length == 0 ?
+                    (
                         <div className="flex justify-center w-screen ">
                             <span className="mt-10 text-lg font-extrabold text-white">Nessun consumatore trovato</span>
                         </div>
-                        :
+                    )
+                    :
+                    (<table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">
+                                    Nome
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Cognome
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Indirizzo
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Telefono
+                                </th>
+                                <th scope="col" className="px-6 py-3"></th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {constumers.map((item) => {
                                 return renderTable(item)
                             })}
                         </tbody>
-                    }
-                </table>
+                    </table>)
+                }
             </div>
-            <ModalSettings show={showModalSetting} onClose={() => setShowModalSetting(false)} />
-            <CustomersFormModal {...currentConstumers} show={showModalCustomers} onClose={() => { setShowModalCustomers(false) }} handleAction={HandleAction} />
-            <ModalAlertDelete handleAction={() => handleDeleteElementById()} show={showModalAletDelete} onClose={() => { setShowModalAletDelete(false); setValidateAlertDelete(-1) }} />
-            <ModalCategory show={showModalCategories} onClose={() => setShowModalCategories(false)} />
+            <ModalSettings
+                show={showModalSetting}
+                onClose={() => setShowModalSetting(false)}
+            />
+            <CustomersFormModal
+                {...currentConstumers}
+                updateListCustomers={() => getDataCustomers()}
+                show={showModalCustomers}
+                onClose={() => { setShowModalCustomers(false) }}
+                handleAction={HandleAction}
+            />
+            <ModalAlertDelete
+                handleAction={() => handleDeleteElementById()}
+                show={showModalAletDelete}
+                onClose={() => { setShowModalAletDelete(false); setValidateAlertDelete(-1) }}
+            />
+            <ModalCategory
+                show={showModalCategories}
+                onClose={() => setShowModalCategories(false)}
+            />
         </div>
     )
 }

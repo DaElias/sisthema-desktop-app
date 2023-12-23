@@ -17,18 +17,23 @@ export default function ElementsForm({ show, onClose, isNew = false, handleCreat
     const [listCategory, setlistCategory] = useState([])
 
     const [element, setElement] = useState({
-        name_element: name,
-        description_element: description,
-        description_shipping_element: description_shipping,
-        value_element: value,
-        id_category_element: id_category,
-        state_element: state,
-        idCustomer
+        name_element: "", description_element: "", description_shipping_element: "", value_element: "", id_category_element: "", state_element: "", idCustomer: ""
     })
+    useEffect(() => {
+        setElement({
+            name_element: name,
+            description_element: description,
+            description_shipping_element: description_shipping,
+            value_element: value,
+            id_category_element: id_category,
+            state_element: state,
+            idCustomer,
+            id
+        })
+    }, [show])
 
     const handleChange = (event) => {
         const { value, name } = event.target
-
         if (name == "value_element") {
             if (value < 0)
                 return
@@ -36,8 +41,8 @@ export default function ElementsForm({ show, onClose, isNew = false, handleCreat
                 setElement(prev => {
                     return { ...prev, [name]: 0 }
                 })
-            if (!parseInt(value))
-                return
+            // if (!parseInt(value))
+            //     return
         }
         setElement(prev => {
             return { ...prev, [name]: value }
@@ -51,15 +56,11 @@ export default function ElementsForm({ show, onClose, isNew = false, handleCreat
             description_shipping: element.description_shipping_element,
             value: element.value_element,
             id_category: element.id_category_element,
-            state: element.state_element,
+            state: element.state_element || "IN_PROCESS",
             idCustomer,
             id
         })
         onClose()
-    }
-
-    const handlePrintApi = (element) => {
-        // ${URL}/?elementName="PC"&customersName="juan"&id="1"&value="12"&delivery_description="loremas"&createdAt="12/12/2012"
     }
 
     useEffect(() => {

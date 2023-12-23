@@ -44,7 +44,7 @@ export default function ModalSettings({ show, onClose }) {
                             {OPTIONS_CONFIG_APP[setting?.id]}
                         </label>
                         <input
-                            className="text-white bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700" placeholder="..."
+                            className="text-black dark:text-white bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700" placeholder="..."
                             type="text"
                             id={setting?.id}
                             onChange={handleChange}

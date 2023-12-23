@@ -1,36 +1,53 @@
 import { useEffect, useState } from "react";
-import { createElementByIdCustomer, deleteElementByIdCustomer, getAllElementById } from "../util/dataStorage";
+import { createCustomer, createElementByIdCustomer, deleteElementByIdCustomer, getAllElementById, updateElementById } from "../util/dataStorage";
 import { open } from '@tauri-apps/api/shell';
-import Row from "./UI/Row";
-import InputText from "./UI/InputText";
+import printElement from "../util/printElement";
 import ElementsForm from "./ElementsForm";
 import ModalComponent from "./ModalComponent/ModalComponent";
+import Row from "./UI/Row";
+import InputText from "./UI/InputText";
 import PrintIcon from "./UI/svg/PrintIcon"
+import EyeIcon from "./UI/svg/EyeIcon";
+import DeleteIcon from "./UI/svg/DeleteIcon";
 import { OPTIONS_STATE_ELEMENT } from "../util/const";
 
+const INITIAL_STATE_ELEMENT = {
+    name_element: "",
+    description_element: "",
+    description_shipping_element: "",
+    value_element: "",
+    id_category_element: "",
+    state_element: "",
+    // idCustomer: "",
+    id: ""
+}
+
 export default function CustomersFormModal(
-    { show, onClose, handleAction = () => { },
+    { show, onClose, handleAction = (e) => { }, updateListCustomers = () => { },
         id = "", name = "", last_name = "", contact_1 = "", email_1 = "", address = "" }
 ) {
     const [customers, setCustomers] = useState({ id, name, last_name, contact_1, email_1, address })
     const [listElements, setListElements] = useState([])
     const [showModalElements, setShowModalElements] = useState(false)
 
-    const getDataElements = async () => {
-        const data = await getAllElementById(id)
+    const [currentElement, setCurrentElement] = useState(INITIAL_STATE_ELEMENT)
+
+    const getDataElements = async (idCustomer = id) => {
+        const data = await getAllElementById(idCustomer)
         setListElements(data)
     }
     useEffect(() => {
         if (show) {
             getDataElements()
         }
-    }, [show])
+    }, [show, showModalElements])
 
     useEffect(() => {
         setCustomers({
             id, name, last_name, contact_1, email_1, address
         })
-    }, [id, name, last_name, contact_1, email_1, address])
+        // }, [id, name, last_name, contact_1, email_1, address])
+    }, [show])
 
     const handleChangeCustomers = (event) => {
         const { value, name } = event.target
@@ -39,13 +56,23 @@ export default function CustomersFormModal(
         })
     }
 
-    const handleCreate = async (element) => {
-        console.log(element)
-        if (element.id == "") {
+    const handleCreateElement = async (element) => {
+        if (id == "" && customers.id == "") {
+            console.log("create customer and element")
+            const customer = await createCustomer(customers)
+            await createElementByIdCustomer({ ...element, idCustomer: customer.id })
+            setCustomers(customer)
+            await getDataElements(customer.id)
+            updateListCustomers()
+            return
+        } else if (element.id == "") {
+            console.log("create element")
             await createElementByIdCustomer(element)
         } else {
-
+            console.log("update element")
+            await updateElementById(element)
         }
+        await getDataElements(customers.id)
     }
 
     const handleDeleteElements = async ({ id, idCustomer }) => {
@@ -53,9 +80,15 @@ export default function CustomersFormModal(
         await getDataElements()
     }
 
-    const handlePrint = async (element) => {
-        console.log("print: ",element)
-    }
+    const handlePrintElement = async (element) =>
+        await printElement({
+            elementName: element.name,
+            customersName: `${customers.name} ${customers.last_name}`,
+            // id: element.id,
+            value: element.value,
+            delivery_description: element.description_shipping,
+        })
+
 
     return (
         <ModalComponent show={show} titleModal="👤 Informazioni" onClose={onClose} isBlockEsc={showModalElements}>
@@ -90,8 +123,8 @@ export default function CustomersFormModal(
                 <Row>
                     <button
                         onClick={() => setShowModalElements(true)}
-                        className="p-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >Aggiungi elemento</button>
-                    {/* <button className="p-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >Aggiungi categoria</button> */}
+                        className="p-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" >Aggiungi elemento
+                    </button>
                 </Row>
             </div>
             <div className="relative overflow-x-auto shadow-md sm:rounded-b-lg max-h-60 bg-blue-600">
@@ -127,14 +160,22 @@ export default function CustomersFormModal(
                                             {OPTIONS_STATE_ELEMENT[element.state] || "?"}
                                         </td>
                                         <td className="flex gap-2 px-6 py-4">
-                                            <button className="font-medium text-white hover:underline">Modificare</button>
+                                            <button
+                                                onClick={() => {
+                                                    setCurrentElement(element)
+                                                    setShowModalElements(true)
+                                                }}
+                                                className="font-medium text-white hover:underline">
+                                                <EyeIcon size={20} />
+                                                {/* <EditIcon size={20} /> */}
+                                            </button>
                                             <button
                                                 onClick={() => handleDeleteElements({ id: element.id, idCustomer: element.idCustomer })}
                                                 className="font-medium text-white hover:underline">
-                                                Eliminare
+                                                <DeleteIcon size={20} />
                                             </button>
                                             <button
-                                                onClick={() => handlePrint(element)}
+                                                onClick={() => handlePrintElement(element)}
                                                 className="font-medium text-white hover:underline">
                                                 <PrintIcon isWhite size={20} />
                                             </button>
@@ -151,9 +192,10 @@ export default function CustomersFormModal(
                 type="button" className="w-full my-2 text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Salvar</button>
             <ElementsForm
                 show={showModalElements}
-                onClose={() => setShowModalElements(false)}
+                onClose={() => { setShowModalElements(false); setCurrentElement(INITIAL_STATE_ELEMENT) }}
                 idCustomer={customers.id}
-                handleCreate={handleCreate}
+                handleCreate={handleCreateElement}
+                {...currentElement}
             />
         </ModalComponent>
     )
