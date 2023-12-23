@@ -4,6 +4,11 @@ import { getAllSettings, setSettings } from "../../util/dataStorage";
 import Row from "../UI/Row";
 import { OPTIONS_CONFIG_APP } from "../../util/const";
 
+const INITIAL_SETTINGS = [
+    { id: "print-api-setting", value: "" },
+    // { id: "example-1", value: "123" },
+]
+
 export default function ModalSettings({ show, onClose }) {
     const [ListSettings, setListSettings] = useState([])
     const [setting, setSetting] = useState({})
@@ -14,7 +19,7 @@ export default function ModalSettings({ show, onClose }) {
         for (let key in data) {
             listData.push({ id: key, value: data[key] })
         }
-        setListSettings(listData)
+        setListSettings(listData.length == 0 ? INITIAL_SETTINGS : listData)
     }
 
     const handleChange = (event) => {
